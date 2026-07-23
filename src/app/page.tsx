@@ -1,65 +1,167 @@
-import Image from "next/image";
+import Link from "next/link";
+import { getPlayerBalances, getPoolSummary } from "@/lib/finance";
+import { prisma } from "@/lib/prisma";
+import { formatDate, formatTk } from "@/lib/format";
+import { SectionTitle, Stat } from "@/components/ui";
 
-export default function Home() {
+export const dynamic = "force-dynamic";
+
+export default async function HomePage() {
+  const [pool, balances, recentSessions] = await Promise.all([
+    getPoolSummary(),
+    getPlayerBalances(),
+    prisma.session.findMany({
+      orderBy: { date: "desc" },
+      take: 4,
+      include: { players: true, payments: true },
+    }),
+  ]);
+
+  const prepaidLeft = balances.filter((b) => b.prepaidRemaining > 0);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <div className="space-y-10">
+      <section className="anim-rise">
+        <p className="anim-pulse text-xs uppercase tracking-[0.28em] text-lime/80">
+          Biweekly pool
+        </p>
+        <h1 className="mt-2 font-[family-name:var(--font-display)] text-5xl leading-none tracking-wide text-chalk sm:text-7xl">
+          Futsal <span className="text-lime">BS23</span>
+        </h1>
+        <p className="mt-3 max-w-lg text-base text-chalk/65">
+          Track turf money, prepaid slots, and who still owes — then split fair
+          teams from ratings.
+        </p>
+      </section>
+
+      <section className="anim-rise-delay-1 grid gap-3 sm:grid-cols-3">
+        <Stat
+          label="Pool remaining"
+          value={formatTk(pool.remaining)}
+          hint="Cash left after all turfs"
+          accent={pool.remaining >= 0 ? "lime" : "amber"}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+        <Stat
+          label="Total collected"
+          value={formatTk(pool.totalIn)}
+          hint={`${pool.playerCount} active players`}
+          accent="chalk"
+        />
+        <Stat
+          label="Turf spent"
+          value={formatTk(pool.totalTurf)}
+          hint={`${pool.sessionCount} sessions`}
+          accent="amber"
+        />
+      </section>
+
+      <section className="anim-rise-delay-2 grid gap-6 lg:grid-cols-2">
+        <div className="rounded-xl border border-line bg-pitch/50 p-5">
+          <SectionTitle
+            title="Recent sessions"
+            subtitle="Latest Europe slots and collections"
+            action={
+              <Link
+                href="/sessions"
+                className="text-sm text-lime hover:underline"
+              >
+                All sessions →
+              </Link>
+            }
+          />
+          <ul className="space-y-3">
+            {recentSessions.map((s) => {
+              const collected = s.payments.reduce((sum, p) => sum + p.amount, 0);
+              return (
+                <li
+                  key={s.id}
+                  className="flex items-center justify-between gap-3 border-b border-line pb-3 last:border-0"
+                >
+                  <div>
+                    <p className="font-medium text-chalk">
+                      {s.title || "Futsal session"}
+                    </p>
+                    <p className="text-sm text-chalk/50">
+                      {formatDate(s.date)} · {s.players.length} players
+                    </p>
+                  </div>
+                  <div className="text-right text-sm">
+                    <p className="text-amber">{formatTk(s.turfCost)}</p>
+                    <p className="text-chalk/50">in {formatTk(collected)}</p>
+                  </div>
+                </li>
+              );
+            })}
+            {recentSessions.length === 0 ? (
+              <p className="text-sm text-chalk/50">No sessions yet.</p>
+            ) : null}
+          </ul>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        <div className="rounded-xl border border-line bg-pitch/50 p-5">
+          <SectionTitle
+            title="Prepaid slots"
+            subtitle="Who still has package credit (900 ÷ 3)"
+            action={
+              <Link
+                href="/players"
+                className="text-sm text-lime hover:underline"
+              >
+                Manage →
+              </Link>
+            }
+          />
+          <ul className="space-y-2">
+            {prepaidLeft.map((b) => (
+              <li
+                key={b.playerId}
+                className="flex items-center justify-between rounded-lg bg-pitch-deep/50 px-3 py-2"
+              >
+                <span>{b.name}</span>
+                <span className="font-[family-name:var(--font-display)] text-xl text-lime">
+                  {b.prepaidRemaining} left
+                </span>
+              </li>
+            ))}
+            {prepaidLeft.length === 0 ? (
+              <p className="text-sm text-chalk/50">
+                No prepaid credits remaining.
+              </p>
+            ) : null}
+          </ul>
         </div>
-      </main>
+      </section>
+
+      <section className="rounded-xl border border-line bg-pitch/40 p-5">
+        <SectionTitle
+          title="Player money"
+          subtitle="Total paid into the pool (prepaid + session + top-ups)"
+        />
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[520px] text-left text-sm">
+            <thead className="text-xs uppercase tracking-wider text-chalk/45">
+              <tr>
+                <th className="pb-2 font-medium">Player</th>
+                <th className="pb-2 font-medium">Rating</th>
+                <th className="pb-2 font-medium">Paid</th>
+                <th className="pb-2 font-medium">Sessions</th>
+                <th className="pb-2 font-medium">Prepaid left</th>
+              </tr>
+            </thead>
+            <tbody>
+              {balances.map((b) => (
+                <tr key={b.playerId} className="border-t border-line">
+                  <td className="py-2.5">{b.name}</td>
+                  <td className="py-2.5 text-lime">{b.rating.toFixed(1)}</td>
+                  <td className="py-2.5">{formatTk(b.totalPaid)}</td>
+                  <td className="py-2.5">{b.sessionsAttended}</td>
+                  <td className="py-2.5">{b.prepaidRemaining}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
     </div>
   );
 }

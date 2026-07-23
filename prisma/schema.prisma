@@ -1,0 +1,67 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Player {
+  id        String   @id @default(cuid())
+  name      String
+  rating    Float    @default(5)
+  isActive  Boolean  @default(true)
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  payments   Payment[]
+  attendance SessionPlayer[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  date      DateTime
+  turfCost  Int
+  title     String?
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  players  SessionPlayer[]
+  payments Payment[]
+}
+
+model SessionPlayer {
+  id           String  @id @default(cuid())
+  sessionId    String
+  playerId     String?
+  guestName    String?
+  paidAmount   Int     @default(0)
+  isPrepaidUse Boolean @default(false)
+
+  session Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  player  Player? @relation(fields: [playerId], references: [id], onDelete: SetNull)
+
+  @@index([sessionId])
+  @@index([playerId])
+}
+
+model Payment {
+  id         String   @id @default(cuid())
+  amount     Int
+  /// PREPAID | SESSION | GUEST | ADJUSTMENT
+  type       String
+  playerId   String?
+  guestName  String?
+  sessionId  String?
+  note       String?
+  createdAt  DateTime @default(now())
+
+  player  Player?  @relation(fields: [playerId], references: [id], onDelete: SetNull)
+  session Session? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+
+  @@index([playerId])
+  @@index([sessionId])
+}

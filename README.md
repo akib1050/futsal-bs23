@@ -1,36 +1,56 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Futsal BS23
 
-## Getting Started
+Biweekly futsal **cost pool**, **player ratings**, and **balanced 2-team maker** for BS23 Europe.
 
-First, run the development server:
+## Features
+
+- **Pool dashboard** — remaining balance, turf spent, prepaid slots left
+- **Players** — add roster, set ratings (1–10), add 900 ৳ prepaid packages
+- **Sessions** — log turf cost (default 4050), attendees, guests, per-head or prepaid use
+- **Team maker** — pick players → split into 2 rating-balanced teams
+- **Ledger** — every payment / guest / adjustment
+
+Seeded with your existing BS23 history (pool remaining ≈ **2,450 ৳**).
+
+## Local setup
 
 ```bash
+npm install
+npm run db:setup
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Deploy (live)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Option A — Railway (recommended with SQLite)
 
-## Learn More
+1. Push this repo to GitHub.
+2. Create a new Railway project → Deploy from GitHub.
+3. Add a volume mounted at `/data`.
+4. Set env:
+   - `DATABASE_URL=file:/data/futsal.db`
+   - `PORT` is provided by Railway
+5. Build command: `npm run build`
+6. Start command: `npx prisma db push && npm run db:seed && npm start`  
+   (run seed only once; afterwards use `npm start`)
 
-To learn more about Next.js, take a look at the following resources:
+### Option B — Vercel + Neon Postgres
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Create a free [Neon](https://neon.tech) database.
+2. In `prisma/schema.prisma`, change:
+   ```prisma
+   provider = "postgresql"
+   ```
+3. Set `DATABASE_URL` to your Neon connection string in Vercel.
+4. Deploy the repo to Vercel.
+5. Run once: `npx prisma db push && npm run db:seed`
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Default turf & prepaid
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Item | Amount |
+|------|--------|
+| Turf (Europe) | 4,050 ৳ |
+| Prepaid package | 900 ৳ → 3 slots |
+| Typical per-head | 300 ৳ |

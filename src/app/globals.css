@@ -1,26 +1,108 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --pitch: #0c3b2e;
+  --pitch-deep: #06241c;
+  --lime: #b8f255;
+  --chalk: #f2f5ef;
+  --mud: #1a4d3e;
+  --amber: #f0b429;
+  --danger: #ff6b5a;
+  --line: rgba(242, 245, 239, 0.14);
+  --background: var(--pitch-deep);
+  --foreground: var(--chalk);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-pitch: var(--pitch);
+  --color-pitch-deep: var(--pitch-deep);
+  --color-lime: var(--lime);
+  --color-chalk: var(--chalk);
+  --color-mud: var(--mud);
+  --color-amber: var(--amber);
+  --color-danger: var(--danger);
+  --color-line: var(--line);
+  --font-display: var(--font-display);
+  --font-sans: var(--font-body);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  min-height: 100vh;
+  color: var(--chalk);
+  background:
+    radial-gradient(ellipse 90% 55% at 50% -10%, rgba(184, 242, 85, 0.18), transparent 55%),
+    radial-gradient(ellipse 60% 40% at 100% 100%, rgba(12, 59, 46, 0.9), transparent 50%),
+    linear-gradient(165deg, #083328 0%, var(--pitch-deep) 45%, #041812 100%);
+  font-family: var(--font-body), system-ui, sans-serif;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+input,
+select,
+textarea,
+button {
+  font: inherit;
+}
+
+.pitch-grid {
+  background-image:
+    linear-gradient(rgba(242, 245, 239, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(242, 245, 239, 0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+.glow-lime {
+  box-shadow: 0 0 0 1px rgba(184, 242, 85, 0.25), 0 12px 40px rgba(0, 0, 0, 0.35);
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse-line {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.anim-rise {
+  animation: rise 0.55s ease-out both;
+}
+
+.anim-rise-delay-1 {
+  animation: rise 0.55s ease-out 0.08s both;
+}
+
+.anim-rise-delay-2 {
+  animation: rise 0.55s ease-out 0.16s both;
+}
+
+.anim-pulse {
+  animation: pulse-line 2.4s ease-in-out infinite;
 }
