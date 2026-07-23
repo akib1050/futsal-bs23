@@ -16,36 +16,33 @@ Seeded with your existing BS23 history (pool remaining ≈ **2,450 ৳**).
 
 ```bash
 npm install
+cp .env.example .env   # set DATABASE_URL (Postgres)
 npm run db:setup
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
 
+Uses **PostgreSQL** (Prisma Postgres / Neon / any Postgres).
+
 ## Deploy (live)
 
-### Option A — Railway (recommended with SQLite)
+### Vercel (recommended)
 
-1. Push this repo to GitHub.
-2. Create a new Railway project → Deploy from GitHub.
-3. Add a volume mounted at `/data`.
-4. Set env:
-   - `DATABASE_URL=file:/data/futsal.db`
-   - `PORT` is provided by Railway
-5. Build command: `npm run build`
-6. Start command: `npx prisma db push && npm run db:seed && npm start`  
-   (run seed only once; afterwards use `npm start`)
-
-### Option B — Vercel + Neon Postgres
-
-1. Create a free [Neon](https://neon.tech) database.
-2. In `prisma/schema.prisma`, change:
-   ```prisma
-   provider = "postgresql"
+1. Import the GitHub repo in [Vercel](https://vercel.com).
+2. Set env `DATABASE_URL` to your Postgres connection string.
+3. Build command: `npm run build`
+4. After first deploy, run seed once locally against that DB:
+   ```bash
+   DATABASE_URL="your-prod-url" npm run db:setup
    ```
-3. Set `DATABASE_URL` to your Neon connection string in Vercel.
-4. Deploy the repo to Vercel.
-5. Run once: `npx prisma db push && npm run db:seed`
+
+### Railway
+
+1. Deploy from GitHub.
+2. Add a Postgres plugin (or use external `DATABASE_URL`).
+3. Build: `npm run build` · Start: `npm start`
+4. Run `npm run db:setup` once against the Railway DB.
 
 ## Default turf & prepaid
 
