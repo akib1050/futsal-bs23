@@ -22,8 +22,8 @@ async function ensureAdmin() {
   const emails = Array.from(
     new Set(
       [
-        process.env.ADMIN_EMAIL,
         "akib@futsalbs23.com",
+        process.env.ADMIN_EMAIL,
         "admin@futsalbs23.com",
       ]
         .filter(Boolean)
