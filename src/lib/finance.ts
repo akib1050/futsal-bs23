@@ -2,6 +2,9 @@ import { prisma } from "./prisma";
 
 export type PaymentType = "PREPAID" | "SESSION" | "GUEST" | "ADJUSTMENT";
 
+/** Cost charged to a player for one futsal slot. 900 tk prepaid = 3 slots. */
+export const SLOT_RATE = 300;
+
 export type PoolSummary = {
   totalIn: number;
   totalTurf: number;
@@ -17,10 +20,39 @@ export type PlayerBalance = {
   rating: number;
   totalPaid: number;
   sessionsAttended: number;
+  charged: number;
+  credit: number;
   prepaidCredits: number;
   prepaidUses: number;
   prepaidRemaining: number;
   balance: number;
+};
+
+export type PlayerStats = {
+  playerId: string;
+  name: string;
+  rating: number;
+  totalPaid: number;
+  charged: number;
+  credit: number;
+  slotsLeft: number;
+  sessionsAttended: number;
+  lastPlayed: Date | null;
+  history: {
+    id: string;
+    date: Date;
+    title: string | null;
+    charge: number;
+    paidAtSession: number;
+    usedPrepaid: boolean;
+  }[];
+  payments: {
+    id: string;
+    amount: number;
+    type: string;
+    note: string | null;
+    createdAt: Date;
+  }[];
 };
 
 export async function getPoolSummary(): Promise<PoolSummary> {
@@ -62,33 +94,80 @@ export async function getPlayerBalances(): Promise<PlayerBalance[]> {
   });
 
   return players.map((player) => {
-    const totalPaid = player.payments
-      .filter((p) => p.type !== "ADJUSTMENT")
-      .reduce((s, p) => s + p.amount, 0);
-    const adjustments = player.payments
-      .filter((p) => p.type === "ADJUSTMENT")
-      .reduce((s, p) => s + p.amount, 0);
+    const totalPaid = player.payments.reduce((s, p) => s + p.amount, 0);
     const prepaidCredits = player.payments
       .filter((p) => p.type === "PREPAID")
-      .reduce((s, p) => s + Math.floor(p.amount / 300), 0);
+      .reduce((s, p) => s + Math.floor(p.amount / SLOT_RATE), 0);
     const prepaidUses = player.attendance.filter((a) => a.isPrepaidUse).length;
     const sessionsAttended = player.attendance.length;
+    const charged = sessionsAttended * SLOT_RATE;
 
     return {
       playerId: player.id,
       name: player.name,
       rating: player.rating,
-      totalPaid: totalPaid + adjustments,
+      totalPaid,
       sessionsAttended,
+      charged,
+      credit: totalPaid - charged,
       prepaidCredits,
       prepaidUses,
       prepaidRemaining: Math.max(0, prepaidCredits - prepaidUses),
-      balance: totalPaid + adjustments,
+      balance: totalPaid,
     };
   });
 }
 
-export function paymentTypeLabel(type: PaymentType): string {
+export async function getPlayerStats(
+  playerId: string
+): Promise<PlayerStats | null> {
+  const player = await prisma.player.findUnique({
+    where: { id: playerId },
+    include: {
+      payments: { orderBy: { createdAt: "desc" } },
+      attendance: { include: { session: true } },
+    },
+  });
+  if (!player) return null;
+
+  const totalPaid = player.payments.reduce((s, p) => s + p.amount, 0);
+  const sessionsAttended = player.attendance.length;
+  const charged = sessionsAttended * SLOT_RATE;
+  const credit = totalPaid - charged;
+
+  const history = player.attendance
+    .map((a) => ({
+      id: a.id,
+      date: a.session.date,
+      title: a.session.title,
+      charge: SLOT_RATE,
+      paidAtSession: a.paidAmount,
+      usedPrepaid: a.isPrepaidUse,
+    }))
+    .sort((a, b) => b.date.getTime() - a.date.getTime());
+
+  return {
+    playerId: player.id,
+    name: player.name,
+    rating: player.rating,
+    totalPaid,
+    charged,
+    credit,
+    slotsLeft: Math.max(0, Math.floor(credit / SLOT_RATE)),
+    sessionsAttended,
+    lastPlayed: history[0]?.date ?? null,
+    history,
+    payments: player.payments.map((p) => ({
+      id: p.id,
+      amount: p.amount,
+      type: p.type,
+      note: p.note,
+      createdAt: p.createdAt,
+    })),
+  };
+}
+
+export function paymentTypeLabel(type: PaymentType | string): string {
   switch (type) {
     case "PREPAID":
       return "Prepaid package";

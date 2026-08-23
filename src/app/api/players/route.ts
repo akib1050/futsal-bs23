@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { requireAdmin, requireApprovedUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 const createSchema = z.object({
@@ -9,6 +10,9 @@ const createSchema = z.object({
 });
 
 export async function GET() {
+  const auth = await requireApprovedUser();
+  if (!auth.ok) return auth.response;
+
   const players = await prisma.player.findMany({
     orderBy: [{ isActive: "desc" }, { name: "asc" }],
     include: {
@@ -21,6 +25,9 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
+  const auth = await requireAdmin();
+  if (!auth.ok) return auth.response;
+
   const body = await req.json();
   const parsed = createSchema.safeParse(body);
   if (!parsed.success) {

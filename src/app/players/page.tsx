@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { Button, Field, SectionTitle, inputClass } from "@/components/ui";
 import { formatTk } from "@/lib/format";
+import { useAuth } from "@/lib/use-auth";
 
 type Player = {
   id: string;
@@ -15,6 +16,7 @@ type Player = {
 };
 
 export default function PlayersPage() {
+  const { isAdmin } = useAuth();
   const [players, setPlayers] = useState<Player[]>([]);
   const [name, setName] = useState("");
   const [rating, setRating] = useState(7);
@@ -26,7 +28,7 @@ export default function PlayersPage() {
     setLoading(true);
     const res = await fetch("/api/players");
     const data = await res.json();
-    setPlayers(data);
+    setPlayers(Array.isArray(data) ? data : []);
     setLoading(false);
   }
 
@@ -88,6 +90,7 @@ export default function PlayersPage() {
         subtitle="Roster with skill ratings used by the team maker. Prepaid = 900 ৳ for 3 slots."
       />
 
+      {isAdmin ? (
       <form
         onSubmit={onCreate}
         className="glow-lime grid gap-3 rounded-xl border border-line bg-pitch/50 p-4 sm:grid-cols-[1fr_140px_auto]"
@@ -122,6 +125,7 @@ export default function PlayersPage() {
           <p className="text-sm text-danger sm:col-span-3">{error}</p>
         ) : null}
       </form>
+      ) : null}
 
       {loading ? (
         <p className="text-chalk/50">Loading players…</p>
@@ -134,7 +138,9 @@ export default function PlayersPage() {
                 <th className="px-4 py-3 font-medium">Rating</th>
                 <th className="px-4 py-3 font-medium">Paid in</th>
                 <th className="px-4 py-3 font-medium">Sessions</th>
-                <th className="px-4 py-3 font-medium">Actions</th>
+                {isAdmin ? (
+                  <th className="px-4 py-3 font-medium">Actions</th>
+                ) : null}
               </tr>
             </thead>
             <tbody>
@@ -154,20 +160,25 @@ export default function PlayersPage() {
                       ) : null}
                     </td>
                     <td className="px-4 py-3">
-                      <input
-                        className="w-20 rounded border border-line bg-pitch-deep px-2 py-1 text-lime"
-                        type="number"
-                        min={1}
-                        max={10}
-                        step={0.5}
-                        defaultValue={p.rating}
-                        onBlur={(e) =>
-                          updateRating(p.id, Number(e.target.value))
-                        }
-                      />
+                      {isAdmin ? (
+                        <input
+                          className="w-20 rounded border border-line bg-pitch-deep px-2 py-1 text-lime"
+                          type="number"
+                          min={1}
+                          max={10}
+                          step={0.5}
+                          defaultValue={p.rating}
+                          onBlur={(e) =>
+                            updateRating(p.id, Number(e.target.value))
+                          }
+                        />
+                      ) : (
+                        <span className="text-lime">{p.rating}</span>
+                      )}
                     </td>
                     <td className="px-4 py-3">{formatTk(paid)}</td>
                     <td className="px-4 py-3">{p._count.attendance}</td>
+                    {isAdmin ? (
                     <td className="px-4 py-3">
                       <div className="flex flex-wrap gap-2">
                         {p.isActive ? (
@@ -190,6 +201,7 @@ export default function PlayersPage() {
                         ) : null}
                       </div>
                     </td>
+                    ) : null}
                   </tr>
                 );
               })}

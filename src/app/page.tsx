@@ -135,17 +135,18 @@ export default async function HomePage() {
       <section className="rounded-xl border border-line bg-pitch/40 p-5">
         <SectionTitle
           title="Player money"
-          subtitle="Total paid into the pool (prepaid + session + top-ups)"
+          subtitle="Paid in, charged at 300 ৳ per session, and what each player has left or owes"
         />
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[520px] text-left text-sm">
+          <table className="w-full min-w-[560px] text-left text-sm">
             <thead className="text-xs uppercase tracking-wider text-chalk/45">
               <tr>
                 <th className="pb-2 font-medium">Player</th>
                 <th className="pb-2 font-medium">Rating</th>
                 <th className="pb-2 font-medium">Paid</th>
-                <th className="pb-2 font-medium">Sessions</th>
-                <th className="pb-2 font-medium">Prepaid left</th>
+                <th className="pb-2 font-medium">Played</th>
+                <th className="pb-2 font-medium">Charged</th>
+                <th className="pb-2 font-medium">Credit / Due</th>
               </tr>
             </thead>
             <tbody>
@@ -155,7 +156,16 @@ export default async function HomePage() {
                   <td className="py-2.5 text-lime">{b.rating.toFixed(1)}</td>
                   <td className="py-2.5">{formatTk(b.totalPaid)}</td>
                   <td className="py-2.5">{b.sessionsAttended}</td>
-                  <td className="py-2.5">{b.prepaidRemaining}</td>
+                  <td className="py-2.5 text-chalk/60">{formatTk(b.charged)}</td>
+                  <td
+                    className={`py-2.5 ${
+                      b.credit < 0 ? "text-danger" : "text-lime"
+                    }`}
+                  >
+                    {b.credit < 0
+                      ? `owes ${formatTk(Math.abs(b.credit))}`
+                      : formatTk(b.credit)}
+                  </td>
                 </tr>
               ))}
             </tbody>

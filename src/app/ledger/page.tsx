@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { Button, Field, SectionTitle, inputClass } from "@/components/ui";
 import { formatDate, formatTk } from "@/lib/format";
+import { useAuth } from "@/lib/use-auth";
 
 type Payment = {
   id: string;
@@ -18,6 +19,7 @@ type Payment = {
 type Player = { id: string; name: string; isActive: boolean };
 
 export default function LedgerPage() {
+  const { isAdmin } = useAuth();
   const [payments, setPayments] = useState<Payment[]>([]);
   const [players, setPlayers] = useState<Player[]>([]);
   const [amount, setAmount] = useState(300);
@@ -32,9 +34,10 @@ export default function LedgerPage() {
       fetch("/api/payments"),
       fetch("/api/players"),
     ]);
-    setPayments(await payRes.json());
-    const plist: Player[] = await playerRes.json();
-    setPlayers(plist.filter((p) => p.isActive));
+    const payData = await payRes.json();
+    const plist = await playerRes.json();
+    setPayments(Array.isArray(payData) ? payData : []);
+    setPlayers(Array.isArray(plist) ? plist.filter((p: Player) => p.isActive) : []);
   }
 
   useEffect(() => {
@@ -68,6 +71,7 @@ export default function LedgerPage() {
         subtitle="Every taka in or out of the pool — prepaid, session pays, guests, adjustments."
       />
 
+      {isAdmin ? (
       <form
         onSubmit={onCreate}
         className="grid gap-3 rounded-xl border border-line bg-pitch/50 p-4 glow-lime sm:grid-cols-2 lg:grid-cols-3"
@@ -129,6 +133,7 @@ export default function LedgerPage() {
           </Button>
         </div>
       </form>
+      ) : null}
 
       <div className="overflow-x-auto rounded-xl border border-line bg-pitch/40">
         <table className="w-full min-w-[720px] text-left text-sm">

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { requireApprovedUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { makeBalancedTeams } from "@/lib/teams";
 
@@ -8,6 +9,9 @@ const schema = z.object({
 });
 
 export async function POST(req: Request) {
+  const auth = await requireApprovedUser();
+  if (!auth.ok) return auth.response;
+
   const body = await req.json();
   const parsed = schema.safeParse(body);
   if (!parsed.success) {

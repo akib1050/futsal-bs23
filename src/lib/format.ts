@@ -1,13 +1,30 @@
+const MONTHS = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
+
+/** Locale-independent so server and client render identically. */
+function withThousands(value: number): string {
+  return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
 export function formatTk(amount: number): string {
   const sign = amount < 0 ? "-" : "";
-  return `${sign}${Math.abs(amount).toLocaleString("en-BD")} ৳`;
+  return `${sign}${withThousands(Math.abs(Math.round(amount)))} ৳`;
 }
 
 export function formatDate(value: string | Date): string {
   const d = typeof value === "string" ? new Date(value) : value;
-  return d.toLocaleDateString("en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
+  const day = d.getUTCDate().toString().padStart(2, "0");
+  return `${day} ${MONTHS[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
 }

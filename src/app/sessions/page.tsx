@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { Button, Field, SectionTitle, inputClass } from "@/components/ui";
 import { formatDate, formatTk } from "@/lib/format";
+import { useAuth } from "@/lib/use-auth";
 
 type Player = { id: string; name: string; rating: number; isActive: boolean };
 
@@ -23,6 +24,7 @@ type Session = {
 };
 
 export default function SessionsPage() {
+  const { isAdmin } = useAuth();
   const [sessions, setSessions] = useState<Session[]>([]);
   const [players, setPlayers] = useState<Player[]>([]);
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
@@ -44,9 +46,9 @@ export default function SessionsPage() {
       fetch("/api/players"),
     ]);
     const sData = await sRes.json();
-    const pData: Player[] = await pRes.json();
-    setSessions(sData);
-    setPlayers(pData.filter((p) => p.isActive));
+    const pData = await pRes.json();
+    setSessions(Array.isArray(sData) ? sData : []);
+    setPlayers(Array.isArray(pData) ? pData.filter((p: Player) => p.isActive) : []);
     setLoading(false);
   }
 
@@ -119,9 +121,10 @@ export default function SessionsPage() {
     <div className="space-y-8">
       <SectionTitle
         title="Sessions"
-        subtitle="Log each biweekly slot: turf cost, who played, and what they paid."
+        subtitle="Every Europe slot — who played, turf cost, and what came in."
       />
 
+      {isAdmin ? (
       <form
         onSubmit={onCreate}
         className="space-y-4 rounded-xl border border-line bg-pitch/50 p-4 glow-lime"
@@ -265,6 +268,7 @@ export default function SessionsPage() {
           </Button>
         </div>
       </form>
+      ) : null}
 
       {loading ? (
         <p className="text-chalk/50">Loading sessions…</p>
@@ -294,14 +298,16 @@ export default function SessionsPage() {
                     <p className="text-sm text-lime">
                       {formatTk(collected)} in
                     </p>
-                    <Button
-                      type="button"
-                      variant="danger"
-                      className="mt-2"
-                      onClick={() => removeSession(s.id)}
-                    >
-                      Delete
-                    </Button>
+                    {isAdmin ? (
+                      <Button
+                        type="button"
+                        variant="danger"
+                        className="mt-2"
+                        onClick={() => removeSession(s.id)}
+                      >
+                        Delete
+                      </Button>
+                    ) : null}
                   </div>
                 </div>
                 <div className="mt-3 flex flex-wrap gap-2">

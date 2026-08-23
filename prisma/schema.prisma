@@ -7,6 +7,24 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  passwordHash String
+  /// PLAYER | ADMIN
+  role         String   @default("PLAYER")
+  isApproved   Boolean  @default(false)
+  phone        String?
+  playerId     String?  @unique
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  player          Player?          @relation(fields: [playerId], references: [id], onDelete: SetNull)
+  paymentRequests PaymentRequest[] @relation("requester")
+  reviewed        PaymentRequest[] @relation("reviewer")
+}
+
 model Player {
   id        String   @id @default(cuid())
   name      String
@@ -16,8 +34,10 @@ model Player {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  payments   Payment[]
-  attendance SessionPlayer[]
+  payments        Payment[]
+  attendance      SessionPlayer[]
+  user            User?
+  paymentRequests PaymentRequest[]
 }
 
 model Session {
@@ -49,19 +69,48 @@ model SessionPlayer {
 }
 
 model Payment {
-  id         String   @id @default(cuid())
-  amount     Int
+  id        String   @id @default(cuid())
+  amount    Int
   /// PREPAID | SESSION | GUEST | ADJUSTMENT
-  type       String
-  playerId   String?
-  guestName  String?
-  sessionId  String?
-  note       String?
-  createdAt  DateTime @default(now())
+  type      String
+  playerId  String?
+  guestName String?
+  sessionId String?
+  note      String?
+  createdAt DateTime @default(now())
 
-  player  Player?  @relation(fields: [playerId], references: [id], onDelete: SetNull)
-  session Session? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+  player         Player?         @relation(fields: [playerId], references: [id], onDelete: SetNull)
+  session        Session?        @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+  paymentRequest PaymentRequest?
 
   @@index([playerId])
   @@index([sessionId])
+}
+
+model PaymentRequest {
+  id           String    @id @default(cuid())
+  userId       String
+  playerId     String?
+  amount       Int
+  /// BKASH | CASH
+  method       String    @default("BKASH")
+  senderNumber String
+  trxId        String
+  note         String?
+  /// PENDING | APPROVED | REJECTED
+  status       String    @default("PENDING")
+  reviewNote   String?
+  reviewedAt   DateTime?
+  reviewedById String?
+  paymentId    String?   @unique
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  user       User     @relation("requester", fields: [userId], references: [id], onDelete: Cascade)
+  reviewedBy User?    @relation("reviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+  player     Player?  @relation(fields: [playerId], references: [id], onDelete: SetNull)
+  payment    Payment? @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([status])
 }

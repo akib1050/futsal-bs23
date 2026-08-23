@@ -1,48 +1,47 @@
 # Futsal BS23
 
-Biweekly futsal **cost pool**, **player ratings**, and **balanced 2-team maker** for BS23 Europe.
+Biweekly futsal **cost pool**, **player login**, **bKash payments**, and **balanced 2-team maker** for BS23 Europe.
+
+Live: [https://futsal-bs23.vercel.app](https://futsal-bs23.vercel.app)
+
+## What players can do
+
+- Register with their roster name and sign in
+- See **credit** (paid − 300 ৳ per session) and match history
+- Pay via **bKash Send Money** to `01796620959`, then submit the transaction ID
+- Credit updates after the admin approves the payment
+
+## What only admin can do
+
+- Open `/admin`
+- Approve or reject bKash payments
+- Approve new accounts and link them to a player card
+- Add sessions, ratings, and ledger entries
+
+Admin login (from seed / env):
+
+- Email: `akib@futsalbs23.com` or `admin@futsalbs23.com`
+- Password: `Akib12345`
 
 ## Features
 
-- **Pool dashboard** — remaining balance, turf spent, prepaid slots left
-- **Players** — add roster, set ratings (1–10), add 900 ৳ prepaid packages
-- **Sessions** — log turf cost (default 4050), attendees, guests, per-head or prepaid use
-- **Team maker** — pick players → split into 2 rating-balanced teams
-- **Ledger** — every payment / guest / adjustment
+- **My card** — personal credit, slots left, previous sessions
+- **Pay** — bKash number + transaction ID submission
+- **Admin** — payment and account approvals
+- **Pool / Players / Sessions / Teams / Ledger** — shared club view
 
-Seeded with your existing BS23 history (pool remaining ≈ **2,450 ৳**).
+Seeded with existing BS23 history (pool remaining ≈ **2,450 ৳**).
 
 ## Local setup
 
 ```bash
 npm install
-cp .env.example .env   # set DATABASE_URL (Postgres)
+cp .env.example .env   # set DATABASE_URL and SESSION_SECRET
 npm run db:setup
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
-
-Uses **PostgreSQL** (Prisma Postgres / Neon / any Postgres).
-
-## Deploy (live)
-
-### Vercel (recommended)
-
-1. Import the GitHub repo in [Vercel](https://vercel.com).
-2. Set env `DATABASE_URL` to your Postgres connection string.
-3. Build command: `npm run build`
-4. After first deploy, run seed once locally against that DB:
-   ```bash
-   DATABASE_URL="your-prod-url" npm run db:setup
-   ```
-
-### Railway
-
-1. Deploy from GitHub.
-2. Add a Postgres plugin (or use external `DATABASE_URL`).
-3. Build: `npm run build` · Start: `npm start`
-4. Run `npm run db:setup` once against the Railway DB.
 
 ## Default turf & prepaid
 
@@ -51,3 +50,4 @@ Uses **PostgreSQL** (Prisma Postgres / Neon / any Postgres).
 | Turf (Europe) | 4,050 ৳ |
 | Prepaid package | 900 ৳ → 3 slots |
 | Typical per-head | 300 ৳ |
+| bKash | 01796620959 |

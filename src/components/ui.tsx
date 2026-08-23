@@ -97,5 +97,22 @@ export function Field({
   );
 }
 
+export function StatusPill({ status }: { status: string }) {
+  const styles =
+    status === "APPROVED"
+      ? "bg-lime/15 text-lime"
+      : status === "REJECTED"
+        ? "bg-danger/15 text-danger"
+        : "bg-amber/15 text-amber";
+
+  return (
+    <span
+      className={`rounded-md px-2 py-1 text-xs uppercase tracking-wide ${styles}`}
+    >
+      {status.toLowerCase()}
+    </span>
+  );
+}
+
 export const inputClass =
   "w-full rounded-md border border-line bg-pitch-deep/80 px-3 py-2 text-chalk outline-none ring-lime/40 placeholder:text-chalk/35 focus:ring-2";

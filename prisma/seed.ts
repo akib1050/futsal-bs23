@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
@@ -15,7 +16,57 @@ const CORE_PLAYERS = [
   { name: "Arittra", rating: 6.5 },
 ];
 
+async function ensureAdmin() {
+  const password = process.env.ADMIN_PASSWORD || "Akib12345";
+  const passwordHash = await bcrypt.hash(password, 10);
+  const emails = Array.from(
+    new Set(
+      [
+        process.env.ADMIN_EMAIL,
+        "akib@futsalbs23.com",
+        "admin@futsalbs23.com",
+      ]
+        .filter(Boolean)
+        .map((e) => String(e).toLowerCase().trim())
+    )
+  );
+
+  const akib = await prisma.player.findFirst({
+    where: { name: { equals: "Akib", mode: "insensitive" } },
+  });
+
+  for (const [index, email] of emails.entries()) {
+    const linkAkib = index === 0 ? akib?.id : undefined;
+    await prisma.user.upsert({
+      where: { email },
+      update: {
+        passwordHash,
+        role: "ADMIN",
+        isApproved: true,
+        name: "Akib",
+        ...(linkAkib ? { playerId: linkAkib } : {}),
+      },
+      create: {
+        email,
+        name: "Akib",
+        passwordHash,
+        role: "ADMIN",
+        isApproved: true,
+        playerId: linkAkib,
+      },
+    });
+    console.log(`Admin ready: ${email}`);
+  }
+}
+
 async function main() {
+  await ensureAdmin();
+
+  if ((await prisma.session.count()) > 0) {
+    console.log("History already seeded — skipping match/payment history.");
+    return;
+  }
+
   await prisma.sessionPlayer.deleteMany();
   await prisma.payment.deleteMany();
   await prisma.session.deleteMany();
