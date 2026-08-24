@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import { syncTurfBookings } from "../src/lib/turf-bookings";
 
 const prisma = new PrismaClient();
 
@@ -61,6 +62,8 @@ async function ensureAdmin() {
 
 async function main() {
   await ensureAdmin();
+  await syncTurfBookings(prisma);
+  console.log("Turf Nation bookings synced.");
 
   if ((await prisma.session.count()) > 0) {
     console.log("History already seeded — skipping match/payment history.");

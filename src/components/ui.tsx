@@ -1,5 +1,17 @@
 import { ReactNode } from "react";
 
+export const cardClass = "card p-4 sm:p-5";
+export const cardAccentClass = "card card-accent p-4 sm:p-5";
+export const tableWrapClass = "table-wrap";
+export const inputClass =
+  "w-full rounded-md border border-line bg-pitch-deep/90 px-3 py-2 text-chalk outline-none ring-lime/25 placeholder:text-chalk/35 focus:border-lime/25 focus:ring-2 focus:ring-lime/15";
+
+export const chipClass =
+  "flex cursor-pointer items-center gap-2 rounded-md border border-line bg-pitch-deep/40 px-3 py-2 text-sm transition hover:border-chalk/15 hover:bg-chalk/5";
+export const chipSelectedClass = "chip-selected";
+export const tabClass = "btn-tab px-3 py-2 text-sm";
+export const tabActiveClass = "btn-tab btn-tab-active px-3 py-2 text-sm";
+
 export function Stat({
   label,
   value,
@@ -19,7 +31,7 @@ export function Stat({
         : "text-lime";
 
   return (
-    <div className="glow-lime rounded-xl border border-line bg-pitch/60 p-4 sm:p-5">
+    <div className={cardClass}>
       <p className="text-xs uppercase tracking-[0.18em] text-chalk/50">{label}</p>
       <p
         className={`mt-2 font-[family-name:var(--font-display)] text-4xl sm:text-5xl ${color}`}
@@ -65,10 +77,10 @@ export function Button({
 }) {
   const styles =
     variant === "primary"
-      ? "bg-lime text-pitch-deep hover:bg-lime/90"
+      ? "border border-lime/22 bg-lime/10 text-chalk hover:border-lime/30 hover:bg-lime/16"
       : variant === "danger"
-        ? "bg-danger/20 text-danger hover:bg-danger/30"
-        : "border border-line bg-white/5 text-chalk hover:bg-white/10";
+        ? "border border-danger/25 bg-danger/10 text-danger/90 hover:bg-danger/16"
+        : "border border-line bg-pitch-deep/40 text-chalk/75 hover:border-chalk/15 hover:bg-chalk/5 hover:text-chalk";
 
   return (
     <button
@@ -97,10 +109,27 @@ export function Field({
   );
 }
 
+export function TabButton({
+  active,
+  children,
+  className = "",
+  ...props
+}: React.ButtonHTMLAttributes<HTMLButtonElement> & { active?: boolean }) {
+  return (
+    <button
+      type="button"
+      className={`${active ? tabActiveClass : tabClass} ${className}`}
+      {...props}
+    >
+      {children}
+    </button>
+  );
+}
+
 export function StatusPill({ status }: { status: string }) {
   const styles =
     status === "APPROVED"
-      ? "bg-lime/15 text-lime"
+      ? "border border-lime/20 bg-lime/10 text-chalk/90"
       : status === "REJECTED"
         ? "bg-danger/15 text-danger"
         : "bg-amber/15 text-amber";
@@ -114,5 +143,18 @@ export function StatusPill({ status }: { status: string }) {
   );
 }
 
-export const inputClass =
-  "w-full rounded-md border border-line bg-pitch-deep/80 px-3 py-2 text-chalk outline-none ring-lime/40 placeholder:text-chalk/35 focus:ring-2";
+export function DataTable({
+  children,
+  minWidth = "560px",
+}: {
+  children: ReactNode;
+  minWidth?: string;
+}) {
+  return (
+    <div className={tableWrapClass}>
+      <table className="text-left text-sm" style={{ minWidth }}>
+        {children}
+      </table>
+    </div>
+  );
+}

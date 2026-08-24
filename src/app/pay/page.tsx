@@ -3,9 +3,12 @@
 import { FormEvent, useEffect, useState } from "react";
 import {
   Button,
+  DataTable,
   Field,
   SectionTitle,
   StatusPill,
+  chipClass,
+  chipSelectedClass,
   inputClass,
 } from "@/components/ui";
 import { formatDate, formatTk } from "@/lib/format";
@@ -89,12 +92,12 @@ export default function PayPage() {
         subtitle="Send money, then submit the transaction ID so the admin can approve it."
       />
 
-      <section className="glow-lime rounded-xl border border-lime/25 bg-lime/5 p-5">
+      <section className="glow-lime p-5">
         <p className="text-xs uppercase tracking-[0.18em] text-chalk/55">
           bKash — Send Money to
         </p>
         <div className="mt-2 flex flex-wrap items-center gap-4">
-          <p className="font-[family-name:var(--font-display)] text-4xl tracking-wider text-lime sm:text-5xl">
+          <p className="font-[family-name:var(--font-display)] text-4xl tracking-wider text-chalk sm:text-5xl">
             {BKASH_NUMBER}
           </p>
           <Button type="button" variant="ghost" onClick={copyNumber}>
@@ -111,7 +114,7 @@ export default function PayPage() {
 
       <form
         onSubmit={onSubmit}
-        className="space-y-4 rounded-xl border border-line bg-pitch/50 p-5"
+        className="space-y-4 glow-lime p-5"
       >
         <div>
           <p className="mb-2 text-xs uppercase tracking-[0.14em] text-chalk/50">
@@ -123,10 +126,8 @@ export default function PayPage() {
                 key={p}
                 type="button"
                 onClick={() => setAmount(p)}
-                className={`rounded-md border px-3 py-2 text-sm transition ${
-                  amount === p
-                    ? "border-lime/50 bg-lime/15 text-lime"
-                    : "border-line bg-pitch-deep/50 text-chalk/70 hover:bg-white/5"
+                className={`${chipClass} ${
+                  amount === p ? chipSelectedClass : ""
                 }`}
               >
                 {formatTk(p)}
@@ -185,42 +186,40 @@ export default function PayPage() {
 
       <section>
         <SectionTitle title="My submissions" subtitle="Status of every bKash payment you sent" />
-        <div className="overflow-x-auto rounded-xl border border-line bg-pitch/40">
-          <table className="w-full min-w-[560px] text-left text-sm">
-            <thead className="border-b border-line text-xs uppercase tracking-wider text-chalk/45">
-              <tr>
-                <th className="px-4 py-3 font-medium">Date</th>
-                <th className="px-4 py-3 font-medium">Amount</th>
-                <th className="px-4 py-3 font-medium">Trx ID</th>
-                <th className="px-4 py-3 font-medium">Status</th>
+        <DataTable minWidth="560px">
+          <thead className="text-xs uppercase tracking-wider text-chalk/45">
+            <tr>
+              <th className="px-4 py-3 font-medium">Date</th>
+              <th className="px-4 py-3 font-medium">Amount</th>
+              <th className="px-4 py-3 font-medium">Trx ID</th>
+              <th className="px-4 py-3 font-medium">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {requests.map((r) => (
+              <tr key={r.id} className="border-t border-line">
+                <td className="px-4 py-2.5 text-chalk/55">
+                  {formatDate(r.createdAt)}
+                </td>
+                <td className="px-4 py-2.5">{formatTk(r.amount)}</td>
+                <td className="px-4 py-2.5 text-chalk/70">{r.trxId}</td>
+                <td className="px-4 py-2.5">
+                  <StatusPill status={r.status} />
+                  {r.reviewNote ? (
+                    <span className="ml-2 text-chalk/45">{r.reviewNote}</span>
+                  ) : null}
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {requests.map((r) => (
-                <tr key={r.id} className="border-t border-line">
-                  <td className="px-4 py-2.5 text-chalk/55">
-                    {formatDate(r.createdAt)}
-                  </td>
-                  <td className="px-4 py-2.5">{formatTk(r.amount)}</td>
-                  <td className="px-4 py-2.5 text-chalk/70">{r.trxId}</td>
-                  <td className="px-4 py-2.5">
-                    <StatusPill status={r.status} />
-                    {r.reviewNote ? (
-                      <span className="ml-2 text-chalk/45">{r.reviewNote}</span>
-                    ) : null}
-                  </td>
-                </tr>
-              ))}
-              {requests.length === 0 ? (
-                <tr>
-                  <td className="px-4 py-4 text-chalk/50" colSpan={4}>
-                    Nothing submitted yet.
-                  </td>
-                </tr>
-              ) : null}
-            </tbody>
-          </table>
-        </div>
+            ))}
+            {requests.length === 0 ? (
+              <tr>
+                <td className="px-4 py-4 text-chalk/50" colSpan={4}>
+                  Nothing submitted yet.
+                </td>
+              </tr>
+            ) : null}
+          </tbody>
+        </DataTable>
       </section>
     </div>
   );

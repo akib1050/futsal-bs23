@@ -27,7 +27,7 @@ export default async function MyCardPage() {
 
   if (!stats) {
     return (
-      <div className="mx-auto mt-10 max-w-xl rounded-xl border border-line bg-pitch/50 p-6 text-center">
+      <div className="card mx-auto mt-10 max-w-xl p-6 text-center">
         <h1 className="font-[family-name:var(--font-display)] text-4xl tracking-wide">
           Hi {user.name}
         </h1>
@@ -84,7 +84,7 @@ export default async function MyCardPage() {
         />
       </section>
 
-      <section className="anim-rise-delay-2 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-lime/25 bg-lime/5 p-5">
+      <section className="glow-lime flex flex-wrap items-center justify-between gap-4 p-5">
         <div>
           <h2 className="font-[family-name:var(--font-display)] text-3xl tracking-wide text-lime">
             {owes ? `Pay ${formatTk(Math.abs(stats.credit))}` : "Top up credit"}
@@ -101,14 +101,14 @@ export default async function MyCardPage() {
         </div>
         <Link
           href="/pay"
-          className="rounded-md bg-lime px-4 py-2.5 font-medium text-pitch-deep transition hover:bg-lime/90"
+          className="rounded-md border border-lime/22 bg-lime/10 px-4 py-2.5 font-medium text-chalk transition hover:border-lime/30 hover:bg-lime/16"
         >
           Go to payment
         </Link>
       </section>
 
       <section className="grid gap-6 lg:grid-cols-2">
-        <div className="rounded-xl border border-line bg-pitch/40 p-5">
+        <div className="card p-5">
           <SectionTitle
             title="Match history"
             subtitle={`Every session you played, charged at ${formatTk(SLOT_RATE)}`}
@@ -137,7 +137,7 @@ export default async function MyCardPage() {
           </ul>
         </div>
 
-        <div className="rounded-xl border border-line bg-pitch/40 p-5">
+        <div className="card p-5">
           <SectionTitle
             title="My payments"
             subtitle="Approved money in, and requests under review"

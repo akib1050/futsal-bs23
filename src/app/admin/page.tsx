@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import {
   Button,
+  DataTable,
   SectionTitle,
   StatusPill,
   inputClass,
@@ -132,7 +133,7 @@ export default function AdminPage() {
           {pending.map((r) => (
             <li
               key={r.id}
-              className="glow-lime rounded-xl border border-amber/25 bg-amber/5 p-4"
+              className="card border-amber/30 p-4"
             >
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
@@ -197,11 +198,7 @@ export default function AdminPage() {
           {[...pendingUsers, ...activeUsers].map((u) => (
             <div
               key={u.id}
-              className={`rounded-xl border p-4 ${
-                u.isApproved
-                  ? "border-line bg-pitch/40"
-                  : "border-lime/30 bg-lime/5"
-              }`}
+              className={`p-4 ${u.isApproved ? "card" : "glow-lime"}`}
             >
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
@@ -284,43 +281,41 @@ export default function AdminPage() {
 
       <section>
         <SectionTitle title="Reviewed payments" subtitle="Approved and rejected history" />
-        <div className="overflow-x-auto rounded-xl border border-line bg-pitch/40">
-          <table className="w-full min-w-[640px] text-left text-sm">
-            <thead className="border-b border-line text-xs uppercase tracking-wider text-chalk/45">
-              <tr>
-                <th className="px-4 py-3 font-medium">Date</th>
-                <th className="px-4 py-3 font-medium">Player</th>
-                <th className="px-4 py-3 font-medium">Amount</th>
-                <th className="px-4 py-3 font-medium">Trx ID</th>
-                <th className="px-4 py-3 font-medium">Status</th>
+        <DataTable minWidth="640px">
+          <thead className="text-xs uppercase tracking-wider text-chalk/45">
+            <tr>
+              <th className="px-4 py-3 font-medium">Date</th>
+              <th className="px-4 py-3 font-medium">Player</th>
+              <th className="px-4 py-3 font-medium">Amount</th>
+              <th className="px-4 py-3 font-medium">Trx ID</th>
+              <th className="px-4 py-3 font-medium">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {reviewed.map((r) => (
+              <tr key={r.id} className="border-t border-line">
+                <td className="px-4 py-2.5 text-chalk/55">
+                  {formatDate(r.createdAt)}
+                </td>
+                <td className="px-4 py-2.5">
+                  {r.player?.name || r.user.name}
+                </td>
+                <td className="px-4 py-2.5">{formatTk(r.amount)}</td>
+                <td className="px-4 py-2.5 text-chalk/70">{r.trxId}</td>
+                <td className="px-4 py-2.5">
+                  <StatusPill status={r.status} />
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {reviewed.map((r) => (
-                <tr key={r.id} className="border-t border-line">
-                  <td className="px-4 py-2.5 text-chalk/55">
-                    {formatDate(r.createdAt)}
-                  </td>
-                  <td className="px-4 py-2.5">
-                    {r.player?.name || r.user.name}
-                  </td>
-                  <td className="px-4 py-2.5">{formatTk(r.amount)}</td>
-                  <td className="px-4 py-2.5 text-chalk/70">{r.trxId}</td>
-                  <td className="px-4 py-2.5">
-                    <StatusPill status={r.status} />
-                  </td>
-                </tr>
-              ))}
-              {reviewed.length === 0 ? (
-                <tr>
-                  <td className="px-4 py-4 text-chalk/50" colSpan={5}>
-                    Nothing reviewed yet.
-                  </td>
-                </tr>
-              ) : null}
-            </tbody>
-          </table>
-        </div>
+            ))}
+            {reviewed.length === 0 ? (
+              <tr>
+                <td className="px-4 py-4 text-chalk/50" colSpan={5}>
+                  Nothing reviewed yet.
+                </td>
+              </tr>
+            ) : null}
+          </tbody>
+        </DataTable>
       </section>
     </div>
   );

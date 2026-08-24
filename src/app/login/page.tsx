@@ -40,8 +40,8 @@ function LoginForm() {
 
   return (
     <div className="anim-rise mx-auto mt-8 max-w-md">
-      <p className="anim-pulse text-xs uppercase tracking-[0.28em] text-lime/80">
-        Futsal BS23
+      <p className="text-xs uppercase tracking-[0.28em] text-lime/70">
+        BS23 · Europe
       </p>
       <h1 className="mt-2 font-[family-name:var(--font-display)] text-5xl tracking-wide text-chalk">
         Sign in
@@ -52,7 +52,7 @@ function LoginForm() {
 
       <form
         onSubmit={onSubmit}
-        className="glow-lime mt-6 space-y-4 rounded-xl border border-line bg-pitch/50 p-5"
+        className="glow-lime mt-6 space-y-4 p-5"
       >
         <Field label="Email">
           <input

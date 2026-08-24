@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Button, SectionTitle } from "@/components/ui";
+import { Button, SectionTitle, chipClass, chipSelectedClass } from "@/components/ui";
 
 type Player = { id: string; name: string; rating: number; isActive: boolean };
 
@@ -64,10 +64,8 @@ export default function TeamsPage() {
         {players.map((p) => (
           <label
             key={p.id}
-            className={`flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2.5 text-sm transition ${
-              selected[p.id]
-                ? "border-lime/40 bg-lime/10"
-                : "border-line bg-pitch/40"
+            className={`${chipClass} py-2.5 ${
+              selected[p.id] ? chipSelectedClass : ""
             }`}
           >
             <input
@@ -76,7 +74,7 @@ export default function TeamsPage() {
               onChange={() => toggle(p.id)}
             />
             <span className="font-medium">{p.name}</span>
-            <span className="ml-auto font-[family-name:var(--font-display)] text-xl text-lime">
+            <span className="ml-auto font-[family-name:var(--font-display)] text-xl text-chalk/75">
               {p.rating}
             </span>
           </label>

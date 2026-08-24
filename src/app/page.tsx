@@ -2,7 +2,7 @@ import Link from "next/link";
 import { getPlayerBalances, getPoolSummary } from "@/lib/finance";
 import { prisma } from "@/lib/prisma";
 import { formatDate, formatTk } from "@/lib/format";
-import { SectionTitle, Stat } from "@/components/ui";
+import { SectionTitle, Stat, DataTable } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -22,11 +22,11 @@ export default async function HomePage() {
   return (
     <div className="space-y-10">
       <section className="anim-rise">
-        <p className="anim-pulse text-xs uppercase tracking-[0.28em] text-lime/80">
-          Biweekly pool
+        <p className="text-xs uppercase tracking-[0.28em] text-lime/70">
+          BS23 · Europe
         </p>
-        <h1 className="mt-2 font-[family-name:var(--font-display)] text-5xl leading-none tracking-wide text-chalk sm:text-7xl">
-          Futsal <span className="text-lime">BS23</span>
+        <h1 className="mt-2 font-[family-name:var(--font-display)] text-5xl leading-none tracking-wide sm:text-7xl">
+          <span className="text-lime">FUTSAL</span>
         </h1>
         <p className="mt-3 max-w-lg text-base text-chalk/65">
           Track turf money, prepaid slots, and who still owes — then split fair
@@ -56,7 +56,7 @@ export default async function HomePage() {
       </section>
 
       <section className="anim-rise-delay-2 grid gap-6 lg:grid-cols-2">
-        <div className="rounded-xl border border-line bg-pitch/50 p-5">
+        <div className="card p-5">
           <SectionTitle
             title="Recent sessions"
             subtitle="Latest Europe slots and collections"
@@ -98,7 +98,7 @@ export default async function HomePage() {
           </ul>
         </div>
 
-        <div className="rounded-xl border border-line bg-pitch/50 p-5">
+        <div className="card p-5">
           <SectionTitle
             title="Prepaid slots"
             subtitle="Who still has package credit (900 ÷ 3)"
@@ -132,45 +132,43 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="rounded-xl border border-line bg-pitch/40 p-5">
+      <section className="card p-5">
         <SectionTitle
           title="Player money"
           subtitle="Paid in, charged at 300 ৳ per session, and what each player has left or owes"
         />
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[560px] text-left text-sm">
-            <thead className="text-xs uppercase tracking-wider text-chalk/45">
-              <tr>
-                <th className="pb-2 font-medium">Player</th>
-                <th className="pb-2 font-medium">Rating</th>
-                <th className="pb-2 font-medium">Paid</th>
-                <th className="pb-2 font-medium">Played</th>
-                <th className="pb-2 font-medium">Charged</th>
-                <th className="pb-2 font-medium">Credit / Due</th>
+        <DataTable minWidth="560px">
+          <thead className="text-xs uppercase tracking-wider text-chalk/45">
+            <tr>
+              <th className="px-4 py-3 font-medium">Player</th>
+              <th className="px-4 py-3 font-medium">Rating</th>
+              <th className="px-4 py-3 font-medium">Paid</th>
+              <th className="px-4 py-3 font-medium">Played</th>
+              <th className="px-4 py-3 font-medium">Charged</th>
+              <th className="px-4 py-3 font-medium">Credit / Due</th>
+            </tr>
+          </thead>
+          <tbody>
+            {balances.map((b) => (
+              <tr key={b.playerId} className="border-t border-line">
+                <td className="px-4 py-3">{b.name}</td>
+                <td className="px-4 py-3 text-lime">{b.rating.toFixed(1)}</td>
+                <td className="px-4 py-3">{formatTk(b.totalPaid)}</td>
+                <td className="px-4 py-3">{b.sessionsAttended}</td>
+                <td className="px-4 py-3 text-chalk/60">{formatTk(b.charged)}</td>
+                <td
+                  className={`px-4 py-3 ${
+                    b.credit < 0 ? "text-danger" : "text-lime"
+                  }`}
+                >
+                  {b.credit < 0
+                    ? `owes ${formatTk(Math.abs(b.credit))}`
+                    : formatTk(b.credit)}
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {balances.map((b) => (
-                <tr key={b.playerId} className="border-t border-line">
-                  <td className="py-2.5">{b.name}</td>
-                  <td className="py-2.5 text-lime">{b.rating.toFixed(1)}</td>
-                  <td className="py-2.5">{formatTk(b.totalPaid)}</td>
-                  <td className="py-2.5">{b.sessionsAttended}</td>
-                  <td className="py-2.5 text-chalk/60">{formatTk(b.charged)}</td>
-                  <td
-                    className={`py-2.5 ${
-                      b.credit < 0 ? "text-danger" : "text-lime"
-                    }`}
-                  >
-                    {b.credit < 0
-                      ? `owes ${formatTk(Math.abs(b.credit))}`
-                      : formatTk(b.credit)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </DataTable>
       </section>
     </div>
   );

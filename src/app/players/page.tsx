@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
-import { Button, Field, SectionTitle, inputClass } from "@/components/ui";
+import { Button, DataTable, Field, SectionTitle, inputClass } from "@/components/ui";
 import { formatTk } from "@/lib/format";
 import { useAuth } from "@/lib/use-auth";
 
@@ -93,7 +93,7 @@ export default function PlayersPage() {
       {isAdmin ? (
       <form
         onSubmit={onCreate}
-        className="glow-lime grid gap-3 rounded-xl border border-line bg-pitch/50 p-4 sm:grid-cols-[1fr_140px_auto]"
+        className="glow-lime grid gap-3 p-4 sm:grid-cols-[1fr_140px_auto]"
       >
         <Field label="Name">
           <input
@@ -130,9 +130,8 @@ export default function PlayersPage() {
       {loading ? (
         <p className="text-chalk/50">Loading players…</p>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-line bg-pitch/40">
-          <table className="w-full min-w-[640px] text-left text-sm">
-            <thead className="border-b border-line text-xs uppercase tracking-wider text-chalk/45">
+        <DataTable minWidth="640px">
+          <thead className="text-xs uppercase tracking-wider text-chalk/45">
               <tr>
                 <th className="px-4 py-3 font-medium">Name</th>
                 <th className="px-4 py-3 font-medium">Rating</th>
@@ -206,8 +205,7 @@ export default function PlayersPage() {
                 );
               })}
             </tbody>
-          </table>
-        </div>
+        </DataTable>
       )}
     </div>
   );

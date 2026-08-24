@@ -31,8 +31,9 @@ export default async function RootLayout({
 
   return (
     <html lang="en" className={`${display.variable} ${body.variable} h-full`}>
-      <body className="min-h-full flex flex-col antialiased">
-        <div className="pitch-grid flex min-h-full flex-1 flex-col">
+      <body className="min-h-full antialiased">
+        <div className="app-bg" aria-hidden="true" />
+        <div className="app-shell">
           <Nav
             user={
               user
@@ -47,8 +48,8 @@ export default async function RootLayout({
           <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-16 pt-6 sm:px-6">
             {pending ? <PendingApproval name={user.name} /> : children}
           </main>
-          <footer className="border-t border-line px-4 py-5 text-center text-sm text-chalk/50">
-            Futsal BS23 · Europe turf pool &amp; team maker
+          <footer className="border-t border-line/80 px-4 py-5 text-center text-sm text-chalk/45">
+            FUTSAL BS23 · Europe turf pool &amp; team maker
           </footer>
         </div>
       </body>
@@ -58,7 +59,7 @@ export default async function RootLayout({
 
 function PendingApproval({ name }: { name: string }) {
   return (
-    <div className="anim-rise mx-auto mt-10 max-w-xl rounded-xl border border-amber/30 bg-amber/5 p-6 text-center">
+    <div className="card anim-rise mx-auto mt-10 max-w-xl p-6 text-center">
       <p className="text-xs uppercase tracking-[0.24em] text-amber/80">
         Waiting for approval
       </p>

@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
-import { Button, Field, SectionTitle, inputClass } from "@/components/ui";
+import { Button, DataTable, Field, SectionTitle, inputClass } from "@/components/ui";
 import { formatDate, formatTk } from "@/lib/format";
 import { useAuth } from "@/lib/use-auth";
 
@@ -74,7 +74,7 @@ export default function LedgerPage() {
       {isAdmin ? (
       <form
         onSubmit={onCreate}
-        className="grid gap-3 rounded-xl border border-line bg-pitch/50 p-4 glow-lime sm:grid-cols-2 lg:grid-cols-3"
+        className="glow-lime grid gap-3 p-4 sm:grid-cols-2 lg:grid-cols-3"
       >
         <Field label="Amount (৳, negative = out)">
           <input
@@ -135,9 +135,8 @@ export default function LedgerPage() {
       </form>
       ) : null}
 
-      <div className="overflow-x-auto rounded-xl border border-line bg-pitch/40">
-        <table className="w-full min-w-[720px] text-left text-sm">
-          <thead className="border-b border-line text-xs uppercase tracking-wider text-chalk/45">
+      <DataTable minWidth="720px">
+          <thead className="text-xs uppercase tracking-wider text-chalk/45">
             <tr>
               <th className="px-4 py-3 font-medium">When</th>
               <th className="px-4 py-3 font-medium">Who</th>
@@ -172,8 +171,7 @@ export default function LedgerPage() {
               </tr>
             ))}
           </tbody>
-        </table>
-      </div>
+      </DataTable>
     </div>
   );
 }
