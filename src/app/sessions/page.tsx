@@ -37,6 +37,12 @@ type TurfBooking = {
 
 type Tab = "upcoming" | "past-slots" | "logged";
 
+function dateKey(value: string | Date): string {
+  const d = typeof value === "string" ? new Date(value) : value;
+  if (Number.isNaN(d.getTime())) return "";
+  return d.toISOString().slice(0, 10);
+}
+
 export default function SessionsPage() {
   const { isAdmin } = useAuth();
   const [tab, setTab] = useState<Tab>("upcoming");
@@ -53,6 +59,8 @@ export default function SessionsPage() {
   const [guestPaid, setGuestPaid] = useState("");
   const [guests, setGuests] = useState<{ name: string; paid: number }[]>([]);
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [saveOk, setSaveOk] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
@@ -120,15 +128,12 @@ export default function SessionsPage() {
   );
 
   const loggedSlotDates = useMemo(
-    () => new Set(sessions.map((s) => s.date.slice(0, 10))),
+    () => new Set(sessions.map((s) => dateKey(s.date))),
     [sessions]
   );
 
   const loggablePastSlots = useMemo(
-    () =>
-      pastBookings.filter(
-        (b) => !loggedSlotDates.has(b.date.slice(0, 10))
-      ),
+    () => pastBookings.filter((b) => !loggedSlotDates.has(dateKey(b.date))),
     [pastBookings, loggedSlotDates]
   );
 
@@ -154,7 +159,9 @@ export default function SessionsPage() {
 
   function addGuest() {
     if (!guestName.trim()) return;
-    const paid = guestPaid === "" ? 0 : Math.max(0, Number(guestPaid));
+    const raw = Number(guestPaid);
+    const paid =
+      guestPaid.trim() === "" || Number.isNaN(raw) ? 0 : Math.max(0, Math.round(raw));
     setGuests((g) => [...g, { name: guestName.trim(), paid }]);
     setGuestName("");
     setGuestPaid("");
@@ -162,41 +169,83 @@ export default function SessionsPage() {
 
   async function onCreate(e: FormEvent) {
     e.preventDefault();
-    if (!selectedSlot) return;
+    setSaveError(null);
+    setSaveOk(null);
+
+    if (!selectedSlot) {
+      setSaveError("Pick a past Turf Nation slot first.");
+      return;
+    }
+    if (!Number.isFinite(turfCost) || turfCost <= 0) {
+      setSaveError("Turf cost must be greater than 0.");
+      return;
+    }
+    if (selectedIds.length === 0 && guests.length === 0) {
+      setSaveError("Add at least one roster player or guest.");
+      return;
+    }
 
     setSaving(true);
+    const rosterPaid = usePrepaid
+      ? 0
+      : Number.isFinite(perHead)
+        ? Math.max(0, Math.round(perHead))
+        : 300;
+
     const attendees = [
       ...selectedIds.map((playerId) => ({
         playerId,
-        paidAmount: usePrepaid ? 0 : perHead,
+        paidAmount: rosterPaid,
         isPrepaidUse: usePrepaid,
       })),
       ...guests.map((g) => ({
         guestName: g.name,
-        paidAmount: g.paid,
+        paidAmount: Number.isFinite(g.paid) ? Math.max(0, Math.round(g.paid)) : 0,
         isPrepaidUse: false,
       })),
     ];
 
-    const res = await fetch("/api/sessions", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        date: selectedSlot.date.slice(0, 10),
-        turfCost,
-        title: `Europe — ${formatDate(selectedSlot.date)}`,
-        notes: notes || null,
-        attendees,
-      }),
-    });
-    setSaving(false);
-    if (!res.ok) return;
-    setNotes("");
-    setGuests([]);
-    setGuestPaid("");
-    setSelected({});
-    setSelectedSlotId("");
-    await load();
+    try {
+      const res = await fetch("/api/sessions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          date: dateKey(selectedSlot.date),
+          turfCost: Math.round(turfCost),
+          title: `Europe — ${formatDate(selectedSlot.date)}`,
+          notes: notes || null,
+          attendees,
+        }),
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const msg =
+          typeof data?.error === "string"
+            ? data.error
+            : res.status === 403
+              ? "Admin login required to save sessions."
+              : res.status === 401
+                ? "Please sign in again, then retry."
+                : "Could not save this session.";
+        setSaveError(msg);
+        return;
+      }
+
+      setNotes("");
+      setGuests([]);
+      setGuestPaid("");
+      setSelected({});
+      setSelectedSlotId("");
+      setSaveOk(
+        `Saved ${formatDate(selectedSlot.date)} · ${selectedSlot.timeSlot}`
+      );
+      await load();
+    } catch {
+      setSaveError("Network error while saving. Check your connection.");
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function removeSession(id: string) {
@@ -419,6 +468,17 @@ export default function SessionsPage() {
                     </li>
                   ))}
                 </ul>
+              ) : null}
+
+              {saveError ? (
+                <p className="rounded-md border border-danger/30 bg-danger/10 px-3 py-2 text-sm text-danger">
+                  {saveError}
+                </p>
+              ) : null}
+              {saveOk ? (
+                <p className="rounded-md border border-lime/25 bg-lime/10 px-3 py-2 text-sm text-chalk">
+                  {saveOk}
+                </p>
               ) : null}
 
               <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line pt-3">

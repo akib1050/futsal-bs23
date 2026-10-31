@@ -36,57 +36,74 @@ export async function POST(req: Request) {
   const auth = await requireAdmin();
   if (!auth.ok) return auth.response;
 
-  const body = await req.json();
-  const parsed = createSchema.safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
-  }
+  try {
+    const body = await req.json();
+    const parsed = createSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Invalid session data. Check slot, turf cost, and attendees." },
+        { status: 400 }
+      );
+    }
 
-  const { date, turfCost, title, notes, attendees } = parsed.data;
+    const { date, turfCost, title, notes, attendees } = parsed.data;
+    const parsedDate = new Date(`${date}T00:00:00.000Z`);
+    if (Number.isNaN(parsedDate.getTime())) {
+      return NextResponse.json({ error: "Invalid session date." }, { status: 400 });
+    }
 
-  const session = await prisma.$transaction(async (tx) => {
-    const created = await tx.session.create({
-      data: {
-        date: new Date(date),
-        turfCost,
-        title: title || null,
-        notes: notes || null,
-      },
-    });
-
-    for (const a of attendees) {
-      await tx.sessionPlayer.create({
+    const session = await prisma.$transaction(async (tx) => {
+      const created = await tx.session.create({
         data: {
-          sessionId: created.id,
-          playerId: a.playerId || null,
-          guestName: a.guestName || null,
-          paidAmount: a.paidAmount,
-          isPrepaidUse: a.isPrepaidUse,
+          date: parsedDate,
+          turfCost,
+          title: title || null,
+          notes: notes || null,
         },
       });
 
-      if (a.paidAmount > 0) {
-        await tx.payment.create({
+      for (const a of attendees) {
+        await tx.sessionPlayer.create({
           data: {
-            amount: a.paidAmount,
-            type: a.playerId ? "SESSION" : "GUEST",
+            sessionId: created.id,
             playerId: a.playerId || null,
             guestName: a.guestName || null,
-            sessionId: created.id,
-            note: a.isPrepaidUse ? "Prepaid slot use (cash 0)" : "Session contribution",
+            paidAmount: a.paidAmount,
+            isPrepaidUse: a.isPrepaidUse,
           },
         });
+
+        if (a.paidAmount > 0) {
+          await tx.payment.create({
+            data: {
+              amount: a.paidAmount,
+              type: a.playerId ? "SESSION" : "GUEST",
+              playerId: a.playerId || null,
+              guestName: a.guestName || null,
+              sessionId: created.id,
+              note: a.isPrepaidUse
+                ? "Prepaid slot use (cash 0)"
+                : "Session contribution",
+            },
+          });
+        }
       }
-    }
 
-    return tx.session.findUnique({
-      where: { id: created.id },
-      include: {
-        players: { include: { player: true } },
-        payments: true,
-      },
+      return tx.session.findUnique({
+        where: { id: created.id },
+        include: {
+          players: { include: { player: true } },
+          payments: true,
+        },
+      });
     });
-  });
 
-  return NextResponse.json(session, { status: 201 });
+    return NextResponse.json(session, { status: 201 });
+  } catch (err) {
+    console.error("POST /api/sessions failed:", err);
+    return NextResponse.json(
+      { error: "Could not save session. Try again." },
+      { status: 500 }
+    );
+  }
 }
