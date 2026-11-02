@@ -268,7 +268,7 @@ export default function SessionsPage() {
     <div className="space-y-8">
       <SectionTitle
         title="Sessions"
-        subtitle="Turf Nation bookings and logged match history for BS23 Europe."
+        subtitle="Turf Nation bookings and logged match history for futsalBuddies."
       />
 
       <div className="flex flex-wrap gap-2">

@@ -23,10 +23,10 @@ export default async function HomePage() {
     <div className="space-y-10">
       <section className="anim-rise">
         <p className="text-xs uppercase tracking-[0.28em] text-lime/70">
-          BS23 · Europe
+          Europe turf
         </p>
         <h1 className="mt-2 font-[family-name:var(--font-display)] text-5xl leading-none tracking-wide sm:text-7xl">
-          <span className="text-lime">FUTSAL</span>
+          <span className="text-lime">futsalBuddies</span>
         </h1>
         <p className="mt-3 max-w-lg text-base text-chalk/65">
           Track turf money, prepaid slots, and who still owes — then split fair

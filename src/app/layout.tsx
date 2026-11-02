@@ -16,9 +16,9 @@ const body = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Futsal BS23 — Europe",
+  title: "futsalBuddies — Europe",
   description:
-    "Biweekly futsal cost tracker, player credit, bKash payments, and balanced team maker for BS23 Europe.",
+    "Biweekly futsal cost tracker, player credit, bKash payments, and balanced team maker for futsalBuddies.",
 };
 
 export default async function RootLayout({
@@ -49,7 +49,7 @@ export default async function RootLayout({
             {pending ? <PendingApproval name={user.name} /> : children}
           </main>
           <footer className="border-t border-line/80 px-4 py-5 text-center text-sm text-chalk/45">
-            FUTSAL BS23 · Europe turf pool &amp; team maker
+            futsalBuddies · Europe turf pool &amp; team maker
           </footer>
         </div>
       </body>

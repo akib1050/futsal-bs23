@@ -48,13 +48,10 @@ export function Nav({ user }: { user: NavUser }) {
           className="group flex shrink-0 items-baseline gap-2"
         >
           <span className="font-[family-name:var(--font-display)] text-3xl leading-none tracking-wide text-lime transition group-hover:text-lime/90">
-            FUTSAL
-          </span>
-          <span className="text-[0.6rem] font-medium uppercase tracking-[0.2em] text-chalk/45 sm:hidden">
-            BS23
+            futsalBuddies
           </span>
           <span className="hidden text-[0.65rem] font-medium uppercase tracking-[0.22em] text-chalk/50 sm:inline">
-            BS23 · Europe
+            Europe
           </span>
         </Link>
 

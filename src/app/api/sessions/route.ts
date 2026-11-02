@@ -52,58 +52,49 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid session date." }, { status: 400 });
     }
 
-    const session = await prisma.$transaction(async (tx) => {
-      const created = await tx.session.create({
-        data: {
-          date: parsedDate,
-          turfCost,
-          title: title || null,
-          notes: notes || null,
-        },
-      });
-
-      for (const a of attendees) {
-        await tx.sessionPlayer.create({
-          data: {
-            sessionId: created.id,
+    // One nested write avoids long interactive transactions timing out
+    // when logging a full roster + guests (common 12–16 attendees).
+    const session = await prisma.session.create({
+      data: {
+        date: parsedDate,
+        turfCost,
+        title: title || null,
+        notes: notes || null,
+        players: {
+          create: attendees.map((a) => ({
             playerId: a.playerId || null,
             guestName: a.guestName || null,
             paidAmount: a.paidAmount,
             isPrepaidUse: a.isPrepaidUse,
-          },
-        });
-
-        if (a.paidAmount > 0) {
-          await tx.payment.create({
-            data: {
+          })),
+        },
+        payments: {
+          create: attendees
+            .filter((a) => a.paidAmount > 0)
+            .map((a) => ({
               amount: a.paidAmount,
               type: a.playerId ? "SESSION" : "GUEST",
               playerId: a.playerId || null,
               guestName: a.guestName || null,
-              sessionId: created.id,
               note: a.isPrepaidUse
                 ? "Prepaid slot use (cash 0)"
                 : "Session contribution",
-            },
-          });
-        }
-      }
-
-      return tx.session.findUnique({
-        where: { id: created.id },
-        include: {
-          players: { include: { player: true } },
-          payments: true,
+            })),
         },
-      });
+      },
+      include: {
+        players: { include: { player: true } },
+        payments: true,
+      },
     });
 
     return NextResponse.json(session, { status: 201 });
   } catch (err) {
     console.error("POST /api/sessions failed:", err);
-    return NextResponse.json(
-      { error: "Could not save session. Try again." },
-      { status: 500 }
-    );
+    const message =
+      err instanceof Error && /timed out|timeout|P1001|P1017/i.test(err.message)
+        ? "Database timed out while saving. Try again in a moment."
+        : "Could not save session. Try again.";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
