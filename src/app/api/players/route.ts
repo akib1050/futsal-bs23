@@ -7,6 +7,7 @@ const createSchema = z.object({
   name: z.string().min(1).max(80),
   rating: z.number().min(1).max(10),
   notes: z.string().max(500).optional().nullable(),
+  jerseySize: z.enum(["S", "M", "L", "XL", "XXL"]).optional().nullable(),
 });
 
 export async function GET() {

@@ -18,6 +18,7 @@ export type PlayerBalance = {
   playerId: string;
   name: string;
   rating: number;
+  jerseySize: string | null;
   totalPaid: number;
   sessionsAttended: number;
   charged: number;
@@ -106,6 +107,7 @@ export async function getPlayerBalances(): Promise<PlayerBalance[]> {
       playerId: player.id,
       name: player.name,
       rating: player.rating,
+      jerseySize: player.jerseySize,
       totalPaid,
       sessionsAttended,
       charged,

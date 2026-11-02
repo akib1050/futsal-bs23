@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { JerseySizeForm } from "@/components/JerseySizeForm";
 import { SectionTitle, Stat } from "@/components/ui";
 import { getCurrentUser } from "@/lib/auth";
 import { SLOT_RATE, getPlayerStats, paymentTypeLabel } from "@/lib/finance";
@@ -12,13 +13,19 @@ export default async function MyCardPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 
-  const [stats, requests] = await Promise.all([
+  const [stats, requests, player] = await Promise.all([
     user.playerId ? getPlayerStats(user.playerId) : null,
     prisma.paymentRequest.findMany({
       where: { userId: user.id },
       orderBy: { createdAt: "desc" },
       take: 10,
     }),
+    user.playerId
+      ? prisma.player.findUnique({
+          where: { id: user.playerId },
+          select: { jerseySize: true },
+        })
+      : Promise.resolve(null),
   ]);
 
   const pendingTotal = requests
@@ -83,6 +90,8 @@ export default async function MyCardPage() {
           accent="chalk"
         />
       </section>
+
+      <JerseySizeForm initialSize={player?.jerseySize ?? null} />
 
       <section className="glow-lime flex flex-wrap items-center justify-between gap-4 p-5">
         <div>

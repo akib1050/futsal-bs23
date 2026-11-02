@@ -212,7 +212,7 @@ export default function SessionsPage() {
         body: JSON.stringify({
           date: dateKey(selectedSlot.date),
           turfCost: Math.round(turfCost),
-          title: `Europe — ${formatDate(selectedSlot.date)}`,
+          title: formatDate(selectedSlot.date),
           notes: notes || null,
           attendees,
         }),

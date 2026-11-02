@@ -23,7 +23,7 @@ export default async function HomePage() {
     <div className="space-y-10">
       <section className="anim-rise">
         <p className="text-xs uppercase tracking-[0.28em] text-lime/70">
-          Europe turf
+          Club pool
         </p>
         <h1 className="mt-2 font-[family-name:var(--font-display)] text-5xl leading-none tracking-wide sm:text-7xl">
           <span className="text-lime">futsalBuddies</span>
@@ -59,7 +59,7 @@ export default async function HomePage() {
         <div className="card p-5">
           <SectionTitle
             title="Recent sessions"
-            subtitle="Latest Europe slots and collections"
+            subtitle="Latest slots and collections"
             action={
               <Link
                 href="/sessions"
@@ -141,17 +141,19 @@ export default async function HomePage() {
           <thead className="text-xs uppercase tracking-wider text-chalk/45">
             <tr>
               <th className="px-4 py-3 font-medium">Player</th>
+              <th className="px-4 py-3 font-medium">Jersey</th>
               <th className="px-4 py-3 font-medium">Rating</th>
-              <th className="px-4 py-3 font-medium">Paid</th>
+              <th className="px-4 py-3 font-medium">Total paid</th>
               <th className="px-4 py-3 font-medium">Played</th>
               <th className="px-4 py-3 font-medium">Charged</th>
-              <th className="px-4 py-3 font-medium">Credit / Due</th>
+              <th className="px-4 py-3 font-medium">Current credit</th>
             </tr>
           </thead>
           <tbody>
             {balances.map((b) => (
               <tr key={b.playerId} className="border-t border-line">
                 <td className="px-4 py-3">{b.name}</td>
+                <td className="px-4 py-3">{b.jerseySize || "—"}</td>
                 <td className="px-4 py-3 text-lime">{b.rating.toFixed(1)}</td>
                 <td className="px-4 py-3">{formatTk(b.totalPaid)}</td>
                 <td className="px-4 py-3">{b.sessionsAttended}</td>

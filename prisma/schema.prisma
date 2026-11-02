@@ -26,13 +26,15 @@ model User {
 }
 
 model Player {
-  id        String   @id @default(cuid())
-  name      String
-  rating    Float    @default(5)
-  isActive  Boolean  @default(true)
-  notes     String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String   @id @default(cuid())
+  name       String
+  rating     Float    @default(5)
+  /// S | M | L | XL | XXL
+  jerseySize String?
+  isActive   Boolean  @default(true)
+  notes      String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   payments        Payment[]
   attendance      SessionPlayer[]
